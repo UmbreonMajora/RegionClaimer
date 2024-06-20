@@ -1,0 +1,15 @@
+main: net.purplegoose.ardania.Main
+name: RegionClaimer
+version: 1.0
+description: Minecraft plugin for ardania.de to claim region via a command
+depend: [WorldGuard]
+load: POSTWORLD
+author: Umbreon
+website: ardania.da
+api-version: 1.20
+commands:
+  rc:
+    description: claim a region
+permissions:
+  RegionClaimer.claim:
+    default: op

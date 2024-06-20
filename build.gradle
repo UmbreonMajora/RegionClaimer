@@ -1,19 +1,49 @@
 plugins {
-    id 'java'
+    id "java"
 }
-
-group = 'net.purplegoose.ardania'
-version = '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
+    maven {
+        name = "papermc-repo"
+        url = "https://repo.papermc.io/repository/maven-public/"
+    }
+    maven {
+        name = "spigot-repo"
+        url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
+    }
+    maven {
+        name = "sonatype"
+        url = "https://oss.sonatype.org/content/groups/public/"
+    }
+    maven {
+        name = "enginehub"
+        url = "https://maven.enginehub.org/repo/"
+    }
 }
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.9.1')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
+    implementation 'log4j:log4j:1.2.17'
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '2.0.6'
+    implementation group: 'org.slf4j', name: 'log4j-over-slf4j', version: '2.0.6'
+    implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.4.5'
+
+    compileOnly "org.spigotmc:spigot-api:1.20.6-R0.1-SNAPSHOT"
+    compileOnly 'com.sk89q.worldguard:worldguard-bukkit:7.0.7'
+    compileOnly 'org.projectlombok:lombok:1.18.32'
+    annotationProcessor('org.projectlombok:lombok:1.18.32')
 }
 
-test {
-    useJUnitPlatform()
+
+// is this necessary?
+def javaVersion = JavaVersion.VERSION_17
+
+java {
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+    toolchain.languageVersion = JavaLanguageVersion.of(javaVersion.toString())
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = javaVersion.toString() as Integer
 }
