@@ -13,6 +13,7 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
 import lombok.extern.slf4j.Slf4j;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 import java.util.Objects;
@@ -43,11 +44,10 @@ public class RegionManager {
         }
 
         Objects.requireNonNull(regionManager).addRegion(newPlayerRegion);
-        player.sendMessage("Successfully created a new region!");
         return true;
     }
 
-    public static boolean areRegionsNearPlayer(Location location) {
+    public static boolean areRegionsNearPlayer(Location location, int regionSize) {
         if (location == null) {
             log.error("A player tried to create a new region but the location was null!");
             return true;
@@ -62,9 +62,9 @@ public class RegionManager {
 
         int xLocation = location.getBlockX();
         int zLocation = location.getBlockZ();
-        for (int x = xLocation - 25; x < xLocation + 25; x++) {
-            for (int z = zLocation - 25; z < zLocation + 25; z++) {
-                for (int y = 320; y > -64; y--) { // Them values are taken out of the BlockVector3 class
+        for (int x = xLocation - (regionSize / 2); x < xLocation + (regionSize / 2); x++) {
+            for (int z = zLocation - (regionSize / 2); z < zLocation + (regionSize / 2); z++) {
+                for (int y = 320; y > -64; y--) {
                     ApplicableRegionSet set = Objects.requireNonNull(regionManager)
                             .getApplicableRegions(BlockVector3.at(x, y, z));
                     if (set.getRegions().size() > 1) {
@@ -74,6 +74,52 @@ public class RegionManager {
             }
         }
         return false;
+    }
+
+    public static void setFence(Location location, Material markerBlock) {
+        int xLocation = location.getBlockX();
+        int zLocation = location.getBlockZ();
+
+        for (int x = xLocation - 26; x < xLocation + 26; x++) {
+            for (int z = zLocation - 26; z < zLocation + 26; z++) {
+                for (int y = 320; y > -64; y--) {
+                    if (x == (xLocation - 25) && z == (zLocation - 25)) {
+                        if (Objects.requireNonNull(location.getWorld()).getBlockAt(x, y, z).getType() != Material.AIR &&
+                                location.getWorld().getBlockAt(x, y + 1, z).getType() == Material.AIR) {
+                            location.getWorld().getBlockAt(x, y, z).setType(markerBlock);
+                            location.getWorld().getBlockAt(x, y, z + 1).setType(markerBlock);
+                            location.getWorld().getBlockAt(x + 1, y, z).setType(markerBlock);
+                        }
+                    }
+                    if (x == (xLocation + 25) && z == (zLocation + 25)) {
+                        if (Objects.requireNonNull(location.getWorld()).getBlockAt(x, y, z).getType() != Material.AIR &&
+                                location.getWorld().getBlockAt(x, y + 1, z).getType() == Material.AIR) {
+                            location.getWorld().getBlockAt(x, y, z).setType(markerBlock);
+                            location.getWorld().getBlockAt(x, y, z - 1).setType(markerBlock);
+                            location.getWorld().getBlockAt(x - 1, y, z).setType(markerBlock);
+                        }
+                    }
+
+                    if (x == (xLocation + 25) && z == (zLocation - 25)) {
+                        if (Objects.requireNonNull(location.getWorld()).getBlockAt(x, y, z).getType() != Material.AIR &&
+                                location.getWorld().getBlockAt(x, y + 1, z).getType() == Material.AIR) {
+                            location.getWorld().getBlockAt(x, y, z).setType(markerBlock);
+                            location.getWorld().getBlockAt(x - 1, y, z).setType(markerBlock);
+                            location.getWorld().getBlockAt(x, y, z + 1).setType(markerBlock);
+                        }
+                    }
+
+                    if (x == (xLocation - 25) && z == (zLocation + 25)) {
+                        if (Objects.requireNonNull(location.getWorld()).getBlockAt(x, y, z).getType() != Material.AIR &&
+                                location.getWorld().getBlockAt(x, y + 1, z).getType() == Material.AIR) {
+                            location.getWorld().getBlockAt(x, y, z).setType(markerBlock);
+                            location.getWorld().getBlockAt(x + 1, y, z).setType(markerBlock);
+                            location.getWorld().getBlockAt(x, y, z - 1).setType(markerBlock);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public static boolean doesPlayerAlreadyHaveRegion(Player player) {

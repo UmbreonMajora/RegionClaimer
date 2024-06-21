@@ -1,0 +1,6 @@
+marker-block: RED_WOOL
+region-size: 50
+# messages:
+success: "Deine Region wurde erfolgreich erstellt!"
+region-close-fail: "Deine Region konnte nicht erstellt werden, es ist bereits eine andere Region in der Nähe."
+region-exists-fail: "Deine Region konnte nicht erstellt werden, du besitzt bereits eine."

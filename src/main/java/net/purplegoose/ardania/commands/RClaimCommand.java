@@ -1,6 +1,8 @@
 package net.purplegoose.ardania.commands;
 
 import lombok.extern.slf4j.Slf4j;
+import net.purplegoose.ardania.Main;
+import net.purplegoose.ardania.util.ConfigReader;
 import net.purplegoose.ardania.util.RegionManager;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
@@ -12,6 +14,12 @@ import org.bukkit.entity.Player;
 public class RClaimCommand implements CommandExecutor {
     public static final String COMMAND = "rc";
 
+    private final ConfigReader configReader;
+
+    public RClaimCommand(ConfigReader configReader) {
+        this.configReader = configReader;
+    }
+
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
         if (!isCommandSenderPlayerInstance(commandSender) || !commandSender.hasPermission("RegionClaimer.claim")) {
@@ -20,17 +28,21 @@ public class RClaimCommand implements CommandExecutor {
 
         Player player = (Player) commandSender;
         if (RegionManager.doesPlayerAlreadyHaveRegion(player)) {
-            player.sendMessage("You already got a region!");
+            player.sendMessage(Main.PREFIX + configReader.getRegionExistsFail());
             return false;
         }
 
         Location location = player.getLocation();
-        if (RegionManager.areRegionsNearPlayer(location)) {
-            player.sendMessage("You cannot do that here, there is already a region nearby!");
+        if (RegionManager.areRegionsNearPlayer(location, configReader.getRegionSizeLimit())) {
+            player.sendMessage(Main.PREFIX + configReader.getRegionCloseFail());
             return false;
         }
 
-        return RegionManager.createRegion(player);
+        if (RegionManager.createRegion(player)) {
+            player.sendMessage(Main.PREFIX + configReader.getSuccess());
+            RegionManager.setFence(location, configReader.getMarkerBlock());
+        }
+        return true;
     }
 
     private boolean isCommandSenderPlayerInstance(CommandSender commandSender) {
